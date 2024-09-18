@@ -1,35 +1,47 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from "react";
+import { forwardRef, useCallback, useState } from "react";
 
-export default forwardRef((props, ref) => {
+import { useGridFilter } from "ag-grid-react";
+
+export default forwardRef(({ onModelChange, getValue }, ref) => {
   const [filterState, setFilterState] = useState("off");
 
-  useImperativeHandle(ref, () => {
-    return {
-      isFilterActive() {
-        return filterState !== "off";
-      },
-      doesFilterPass(params) {
-        console.log("Filter State:", filterState);
-        console.log("Row Data Make:", params.data.make);
-        return params.data.make === filterState;
-      },
-      getModel() {
-        return undefined;
-      },
-      setModel() {},
-    };
+  // Callback function to determine if the filter passes for a given node
+  const doesFilterPass = useCallback(
+    ({ node }) => {
+      const value = getValue(node).toString().toLowerCase();
+
+      // Check the current filter state and filter accordingly
+      if (filterState === "off") {
+        return true; // If filter is off, all rows pass
+      }
+      return value.includes(filterState.toLowerCase());
+    },
+    [filterState, getValue]
+  );
+
+  // Use the AG Grid filtering hook to apply the filter logic
+  useGridFilter({
+    doesFilterPass,
+    isFilterActive: () => filterState !== "off", // Filter is active when not "off"
   });
 
-  useEffect(() => {
-    if (props.api) {
-      props.api.onFilterChanged();
-    }
-  }, [filterState, props.api]);
+  // Update the filter model and state when "Ford" is selected
+  const onChangeFord = () => {
+    setFilterState("Ford");
+    onModelChange({ value: "Ford" });
+  };
+
+  // Update the filter model and state when "Honda" is selected
+  const onChangeHonda = () => {
+    setFilterState("Honda");
+    onModelChange({ value: "Honda" });
+  };
+
+  // Turn off the filter
+  const onChangeOff = () => {
+    setFilterState("off");
+    onModelChange({ value: "" });
+  };
 
   return (
     <>
@@ -39,7 +51,7 @@ export default forwardRef((props, ref) => {
         <input
           type="radio"
           name="companyFilter"
-          onChange={() => setFilterState("off")}
+          onChange={onChangeOff}
           checked={filterState === "off"}
         />
       </label>
@@ -48,7 +60,7 @@ export default forwardRef((props, ref) => {
         <input
           type="radio"
           name="companyFilter"
-          onChange={() => setFilterState("Ford")}
+          onChange={onChangeFord}
           checked={filterState === "Ford"}
         />
       </label>
@@ -57,7 +69,7 @@ export default forwardRef((props, ref) => {
         <input
           type="radio"
           name="companyFilter"
-          onChange={() => setFilterState("Honda")}
+          onChange={onChangeHonda}
           checked={filterState === "Honda"}
         />
       </label>
