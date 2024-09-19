@@ -11,7 +11,7 @@ const ExportCSV = () => {
   const gridRef = useRef();
   const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
   const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
-  const [rowData, setRowData] = useState([
+  const [rowData] = useState([
     { make: "Toyota", model: "Celica", price: 35000 },
     { make: "Ford", model: "Mondeo", price: 32000 },
     { make: "Porsche", model: "Boxster", price: 72000 },
@@ -26,7 +26,7 @@ const ExportCSV = () => {
   const popupParent = useMemo(() => {
     return document.body;
   }, []);
-  const [columnDefs, setColumnDefs] = useState([
+  const [columnDefs] = useState([
     { field: "make" },
     { field: "model" },
     { field: "price" },
